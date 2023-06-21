@@ -14,6 +14,52 @@ public class Expressao {
 
     }
 
+    public int calculaValor() {
+    try {
+        String expressaoPosfixa = convertePosfixa();
+        Pilha<Integer> pilha = new Pilha<>(expressaoPosfixa.length());
+
+        for (int i = 0; i < expressaoPosfixa.length(); i++) {
+            char c = expressaoPosfixa.charAt(i);
+
+            if (Character.isDigit(c)) {
+                pilha.push(Character.getNumericValue(c));
+            } else {
+                int operando2 = pilha.pop();
+                int operando1 = pilha.pop();
+                int resultado;
+
+                switch (c) {
+                    case '+':
+                        resultado = operando1 + operando2;
+                        break;
+                    case '-':
+                        resultado = operando1 - operando2;
+                        break;
+                    case '*':
+                        resultado = operando1 * operando2;
+                        break;
+                    case '/':
+                        resultado = operando1 / operando2;
+                        break;
+                    case '^':
+                        resultado = (int) Math.pow(operando1, operando2);
+                        break;
+                    default:
+                        throw new IllegalArgumentException("Operador inválido: " + c);
+                }
+
+                pilha.push(resultado);
+            }
+        }
+
+        return pilha.pop();
+    } catch (Exception e) {
+        e.printStackTrace();
+        return 0;
+    }
+}
+
     public String convertePosfixa() throws Exception {
         String posfixa = "";
         Pilha<Integer> pilha = new Pilha<Integer>(expressaoInfixa.length);
