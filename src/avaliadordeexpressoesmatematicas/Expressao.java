@@ -1,208 +1,195 @@
 package avaliadordeexpressoesmatematicas;
 
 public class Expressao {
-    
+
     private Character[] expressaoInfixa;
     private Character[] expressaoPosfixa;
 
     public Expressao(String exp) {
-        
+
         this.expressaoInfixa = new Character[exp.length()];
         for (int i = 0; i < exp.length(); i++) {
-            this.getExpressaoSep()[i] = exp.charAt(i);
+            this.getExpressaoInfixa()[i] = exp.charAt(i);
         }
 
     }
 
     public int calculaValor() {
-    try {
-        String expressaoPosfixa = convertePosfixa();
-        Pilha<Integer> pilha = new Pilha<>(expressaoPosfixa.length());
+        try {
+            Pilha<Integer> pilha = new Pilha<>(this.getExpressaoPosfixa().length);
 
-        for (int i = 0; i < expressaoPosfixa.length(); i++) {
-            char c = expressaoPosfixa.charAt(i);
+            for (int i = 0; i < this.getExpressaoPosfixa().length; i++) {
+                char c = this.getExpressaoPosfixa()[i];
 
-            if (Character.isDigit(c)) {
-                pilha.push(Character.getNumericValue(c));
-            } else {
-                int operando2 = pilha.pop();
-                int operando1 = pilha.pop();
-                int resultado;
+                if (Character.isDigit(c)) {
+                    pilha.push(Character.getNumericValue(c));
+                } else {
+                    int operando2 = pilha.pop();
+                    int operando1 = pilha.pop();
+                    int resultado;
 
-                switch (c) {
-                    case '+':
-                        resultado = operando1 + operando2;
-                        break;
-                    case '-':
-                        resultado = operando1 - operando2;
-                        break;
-                    case '*':
-                        resultado = operando1 * operando2;
-                        break;
-                    case '/':
-                        resultado = operando1 / operando2;
-                        break;
-                    case '^':
-                        resultado = (int) Math.pow(operando1, operando2);
-                        break;
-                    default:
-                        throw new IllegalArgumentException("Operador inválido: " + c);
+                    switch (c) {
+                        case '+':
+                            resultado = operando1 + operando2;
+                            break;
+                        case '-':
+                            resultado = operando1 - operando2;
+                            break;
+                        case '*':
+                            resultado = operando1 * operando2;
+                            break;
+                        case '/':
+                            resultado = operando1 / operando2;
+                            break;
+                        case '^':
+                            resultado = (int) Math.pow(operando1, operando2);
+                            break;
+                        default:
+                            throw new IllegalArgumentException("Operador inválido: " + c);
+                    }
+
+                    pilha.push(resultado);
                 }
-
-                pilha.push(resultado);
             }
+
+            return pilha.pop();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return 0;
         }
-
-        return pilha.pop();
-    } catch (Exception e) {
-        e.printStackTrace();
-        return 0;
     }
-}
 
-    public String convertePosfixa() throws Exception {
+    public void convertePosfixa() throws Exception {
         String posfixa = "";
-        Pilha<Integer> pilha = new Pilha<Integer>(expressaoInfixa.length);
+        Pilha<Character> pilha = new Pilha<Character>(getExpressaoInfixa().length);
         int cont = 0;
         char c;
-    
-        while (cont < expressaoInfixa.length) {
-            c = expressaoInfixa[cont];
+
+        while (cont < getExpressaoInfixa().length) {
+            c = getExpressaoInfixa()[cont];
             switch (c) {
                 case '*':
                 case '/':
                 case '+':
                 case '-':
                 case '^':
-                    while ((!pilha.isEmpty()) && prioridade(c) <= prioridade((char) ((int) pilha.peek()))) {
-                        posfixa += (char) ((int) pilha.pop());
+                    while ((!pilha.isEmpty()) && prioridade(c) <= prioridade(pilha.peek())) {
+                        posfixa = posfixa.concat(pilha.pop().toString());
                     }
-    
-                    try {
-                        pilha.push((int) c);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
+                    pilha.push(c);
                     break;
-    
+
                 case '(':
-                    try {
-                        pilha.push((int) c);
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
+
+                    pilha.push(c);
+
                     break;
-    
+
                 case ')':
-                    while ((char) ((int) pilha.peek()) != '(') {
-                        posfixa += (char) ((int) pilha.pop());
+                    while (pilha.peek() != '(') {
+                        posfixa = posfixa.concat(pilha.pop().toString());
                     }
-    
-                    if ((char) ((int) pilha.peek()) == '(') {
-                        try {
-                            pilha.pop();
-                        } catch (Exception e) {
-                            e.printStackTrace();
-                        }
+
+                    if (pilha.peek() == '(') {
+
+                        pilha.pop();
+
                     }
                     break;
-    
+
                 default:
-                    posfixa += expressaoInfixa[cont];
+                    posfixa = posfixa.concat(getExpressaoInfixa()[cont].toString());
                     break;
             }
             cont++;
         }
         while (!pilha.isEmpty()) {
-            if ((char) ((int) pilha.peek()) != '(') {
-                posfixa += (char) ((int) pilha.pop());
+            if (pilha.peek() != '(') {
+                posfixa = posfixa.concat(pilha.pop().toString());
             } else {
-                try {
-                    pilha.pop();
-                } catch (Exception e) {
-                    e.printStackTrace();
-                }
+
+                pilha.pop();
+
             }
         }
-    
-        return posfixa;
+
+        Character[] temp = new Character[this.getExpressaoInfixa().length];
+
+        for (int i = 0; i < temp.length; i++) {
+            temp[i] = posfixa.charAt(i);
+        }
+
+        this.setExpressaoPosfixa(temp);
     }
-    
-	public static int prioridade(char elemento)
-	{
-		int prioridade;
-		switch(elemento)
-		{
-			case '+':
-			case '-':
-				prioridade = 1;
-				break;
-				
-			case '*':
-			case '/':
-				prioridade = 2;
-				break;
-				
-			case '^':
-				prioridade = 3;
-				break;
-				
-			default:
-				prioridade = 0;
-				break;
-		}
-		
-		return prioridade;
-	}
+
+    public static int prioridade(char elemento) {
+        int prioridade;
+        switch (elemento) {
+            case '+':
+            case '-':
+                prioridade = 1;
+                break;
+
+            case '*':
+            case '/':
+                prioridade = 2;
+                break;
+
+            case '^':
+                prioridade = 3;
+                break;
+
+            default:
+                prioridade = 0;
+                break;
+        }
+
+        return prioridade;
+    }
 
     public boolean verificaValidade() throws Exception {
         int count = 0;
         int countpar = 0;
         Character temp;
-        while (count < expressaoInfixa.length) {
-            temp = expressaoInfixa[count];
+        while (count < getExpressaoInfixa().length) {
+            temp = getExpressaoInfixa()[count];
 
             if (temp.compareTo('(') == 0) {
                 countpar++;
-            } else if ((expressaoInfixa[count] >= 48 && expressaoInfixa[count] <= 57)  || expressaoInfixa[count] == 40) {
-                if (count + 1 < expressaoInfixa.length) {
-                    if ((expressaoInfixa[count + 1] >= 48 && expressaoInfixa[count + 1] <= 57) || expressaoInfixa[count + 1] == 40) {
-                        System.out.println("Essa expressao está invalida");
+            } else if ((getExpressaoInfixa()[count] >= 48 && getExpressaoInfixa()[count] <= 57) || getExpressaoInfixa()[count] == 40) {
+                if (count + 1 < getExpressaoInfixa().length) {
+                    if ((getExpressaoInfixa()[count + 1] >= 48 && getExpressaoInfixa()[count + 1] <= 57) || getExpressaoInfixa()[count + 1] == 40) {
                         return false;
                     }
                 } else {
                     break;
                 }
-            } else if (expressaoInfixa[count].compareTo('+') == 0 || expressaoInfixa[count].compareTo('-') == 0 || expressaoInfixa[count].compareTo('*') == 0 || expressaoInfixa[count].compareTo('/') == 0 || expressaoInfixa[count].compareTo('^') == 0) {
-                if (count + 1 < expressaoInfixa.length) {
+            } else if (getExpressaoInfixa()[count].compareTo('+') == 0 || getExpressaoInfixa()[count].compareTo('-') == 0 || getExpressaoInfixa()[count].compareTo('*') == 0 || getExpressaoInfixa()[count].compareTo('/') == 0 || getExpressaoInfixa()[count].compareTo('^') == 0) {
+                if (count + 1 < getExpressaoInfixa().length) {
 
-                    if (expressaoInfixa[count + 1].compareTo('+') == 0 || expressaoInfixa[count + 1].compareTo('-') == 0 || expressaoInfixa[count + 1].compareTo('*') == 0 || expressaoInfixa[count + 1].compareTo('/') == 0 || expressaoInfixa[count + 1].compareTo('^') == 0) {
-                        System.out.println("Essa expressao está invalida");
+                    if (getExpressaoInfixa()[count + 1].compareTo('+') == 0 || getExpressaoInfixa()[count + 1].compareTo('-') == 0 || getExpressaoInfixa()[count + 1].compareTo('*') == 0 || getExpressaoInfixa()[count + 1].compareTo('/') == 0 || getExpressaoInfixa()[count + 1].compareTo('^') == 0) {
                         return false;
                     }
                 } else {
                     break;
                 }
-                if (count + 1 < expressaoInfixa.length) {
+                if (count + 1 < getExpressaoInfixa().length) {
 
                     if (!((expressaoInfixa[count + 1] >= 48 && expressaoInfixa[count + 1] <= 57) || expressaoInfixa[count + 1] == 40)) {
-                        
-                        System.out.println("Essa expressao está invalida");
+
                         return false;
                     }
                 } else {
                     break;
                 }
                 if (!((expressaoInfixa[count - 1] >= 48 && expressaoInfixa[count - 1] <= 57) || expressaoInfixa[count - 1] == 40 || expressaoInfixa[count - 1] == 41)) {
-                    System.out.println("Essa expressao está invalida");
                     return false;
                 }
 
             } else if (temp.compareTo(')') == 0) {
                 countpar--;
-                if (count + 1 < expressaoInfixa.length) {
-                    if ((expressaoInfixa[count + 1] >= 48 && expressaoInfixa[count + 1] <= 57) || expressaoInfixa[count + 1] == 40) {
-                        System.out.println("Essa expressao está invalida");
+                if (count + 1 < getExpressaoInfixa().length) {
+                    if ((getExpressaoInfixa()[count + 1] >= 48 && getExpressaoInfixa()[count + 1] <= 57) || getExpressaoInfixa()[count + 1] == 40) {
                         return false;
                     }
                 } else {
@@ -213,38 +200,45 @@ public class Expressao {
         }
 
         if (countpar != 0) {
-            System.out.println("Essa expressao está invalida");
             return false;
         }
 
         return true;
     }
-    
- 
-    @Override
-    public String toString(){
-        String expFinal = "";
-        
-        for (int i = 0; i < expressaoInfixa.length; i++) {
-            expFinal =  expFinal.concat(expressaoInfixa[i].toString());
-        }
-        
-        return expFinal;
-    }
-    
-    
-    
-    
-    public Character[] getExpressaoSep() {
+
+    public Character[] getExpressaoInfixa() {
         return expressaoInfixa;
     }
-    public void setExpressaoSep(Character[] expressaoSep) {
-        this.expressaoInfixa = expressaoSep;
+
+    public void setExpressaoInfixa(Character[] expressaoInfixa) {
+        this.expressaoInfixa = expressaoInfixa;
     }
-    public Character[] getExpressaoPosfixo() {
+
+    public Character[] getExpressaoPosfixa() {
         return expressaoPosfixa;
     }
-    public void setExpressaoPosfixo(Character[] expressaoPosfixo) {
-        this.expressaoPosfixa = expressaoPosfixo;
+
+    public void setExpressaoPosfixa(Character[] expressaoPosfixa) {
+        this.expressaoPosfixa = expressaoPosfixa;
+    }
+
+    public String toStringI() {
+        String temp = "";
+
+        for (int i = 0; i < this.getExpressaoInfixa().length; i++) {
+            temp = temp.concat(this.getExpressaoInfixa()[i].toString());
+        }
+
+        return temp;
+    }
+
+    public String toStringP() {
+        String temp = "";
+
+        for (int i = 0; i < this.getExpressaoPosfixa().length; i++) {
+            temp = temp.concat(this.getExpressaoPosfixa()[i].toString());
+        }
+
+        return temp;
     }
 }
