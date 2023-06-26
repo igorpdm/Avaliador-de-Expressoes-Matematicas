@@ -1,6 +1,6 @@
 # Avaliador de Expressões Matemáticas
 
-Este é um programa Java que permite avaliar expressões matemáticas, converter expressões infixas em expressões posfixas e calcular o valor das expressões.
+Este é um programa simples em Java que permite avaliar expressões matemáticas fornecidas pelo usuário. Ele converte a expressão da forma infixada para a forma posfixada (notação polonesa reversa) e, em seguida, calcula o valor da expressão.
 
 ## Uso
 
